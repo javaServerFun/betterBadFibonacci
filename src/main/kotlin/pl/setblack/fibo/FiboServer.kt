@@ -3,14 +3,10 @@ package pl.setblack.fibo
 import org.springframework.http.MediaType
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter
 import org.springframework.web.reactive.function.BodyInserters.fromObject
-import org.springframework.web.reactive.function.BodyInserters.fromPublisher
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.server.RouterFunctions
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
-import reactor.core.publisher.Mono
-import reactor.ipc.netty.http.server.HttpServer
-import java.util.function.Function
+import reactor.netty.http.server.HttpServer
 
 class FiboServer {
     fun start() {
@@ -30,8 +26,17 @@ class FiboServer {
 
         val httpHandler = RouterFunctions.toHttpHandler(route)
         val adapter = ReactorHttpHandlerAdapter(httpHandler)
-        val server = HttpServer.create("localhost", 8080)
-        server.startAndAwait(adapter)
+        val server = HttpServer
+                .create()
+                .host("localhost")
+                .port(8080)
+                .handle(adapter)
+                .bindNow()
+        println("press enter")
+
+        readLine()
+
+        server.disposeNow()
     }
 }
 
